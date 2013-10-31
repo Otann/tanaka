@@ -3,11 +3,12 @@ language: scala
 scala:
    - 2.10.2
 
+services:
+  - mongodb
+
 sbt_args: -no-colors
 
 jdk:
   - openjdk7
   - oraclejdk7
 
-services:
-  - mongodb

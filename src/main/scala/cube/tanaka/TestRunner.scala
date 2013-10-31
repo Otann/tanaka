@@ -21,13 +21,13 @@ class TestRunner {
   def main(args: List[String]) {
 
     val o = Omega(z = "something", y = false)
-    val _id = OmegaDAO.insert(o)
-    val o_* = OmegaDAO.findOne(MongoDBObject("z" -> "something"))
+//    val _id = OmegaDAO.insert(o)
+//    val o_* = OmegaDAO.findOne(MongoDBObject("z" -> "something"))
 
 
-    val toUpdate = o.copy(z = "something else")
-    OmegaDAO.update(MongoDBObject("z" -> "something"), toUpdate, upsert = false, multi = false, WriteConcern.Normal)
-    val o_** = OmegaDAO.findOneById(new ObjectId("4dac7b3e75e1b63949139c91"))
+//    val toUpdate = o.copy(z = "something else")
+//    OmegaDAO.update(MongoDBObject("z" -> "something"), toUpdate, upsert = false, multi = false, WriteConcern.Normal)
+//    val o_** = OmegaDAO.findOneById(new ObjectId("4dac7b3e75e1b63949139c91"))
 
   }
 }
