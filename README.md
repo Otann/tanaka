@@ -1,5 +1,7 @@
 # My Scalatra Web App #
 
+[![Build Status](https://travis-ci.org/Otann/tanaka.png?branch=master)](https://travis-ci.org/Otann/tanaka)
+
 ## Build & Run ##
 
 ```sh
