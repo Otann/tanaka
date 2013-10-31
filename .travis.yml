@@ -1,0 +1,13 @@
+language: scala
+
+scala:
+   - 2.10.2
+
+sbt_args: -no-colors
+
+jdk:
+  - openjdk7
+  - oraclejdk7
+
+services:
+  - mongodb

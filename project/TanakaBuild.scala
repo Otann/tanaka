@@ -67,10 +67,10 @@ object TanakaBuild extends Build {
       val scalatra = "2.2.1"
     }
 
-    lazy val all = logging ++ scalatra ++ jetty
+    lazy val all = db ++ scalatra ++ jetty ++ logging
 
     lazy val db = Seq(
-      "com.novus" %% "salat" % "1.9.4"
+      "com.novus" %% "salat" % "1.9.4" exclude("org.scala-lang", "scalap")
     )
 
     lazy val logging = Seq(
