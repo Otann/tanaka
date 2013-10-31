@@ -7,7 +7,6 @@ import org.scalatra.sbt.PluginKeys._
 import com.mojolly.scalate.ScalatePlugin._
 import scala.Some
 import ScalateKeys._
-import net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 object TanakaBuild extends Build {
 
@@ -26,7 +25,6 @@ object TanakaBuild extends Build {
       ++ scalateSettings
       ++ scalateLocalSettings
       ++ buildLocalSettings
-      ++ graphSettings
       ++ Seq(
 
       resolvers += Classpaths.typesafeReleases,
