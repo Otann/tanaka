@@ -1,5 +1,4 @@
 target/
-logs/
 
 .DS_Store?
 ehthumbs.db
@@ -10,20 +9,11 @@ Thumbs.db
 .idea/
 .idea_modules/
 
-src/main/webapp/static/css/styles*
-
 .cache
 .classpath
 .project
 .settings/
 .buildpath
 .history
-src/main/webapp/static/js/compiled/
 .~lock*
 .vagrant*
-dump/
-
-MacBook-Pro-Alexander.local.props
-.user
-test.csv
-

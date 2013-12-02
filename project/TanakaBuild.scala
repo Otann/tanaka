@@ -1,33 +1,25 @@
-import com.mojolly.scalate.ScalatePlugin.Binding
-import com.mojolly.scalate.ScalatePlugin.TemplateConfig
 import sbt._
 import Keys._
-import org.scalatra.sbt._
-import org.scalatra.sbt.PluginKeys._
-import com.mojolly.scalate.ScalatePlugin._
-import scala.Some
-import ScalateKeys._
+import spray.revolver.RevolverPlugin._
 
 object TanakaBuild extends Build {
 
   val buildLocalSettings = Seq(
-    organization := "org.generalrhetoric",
-    name         := "My Scalatra Web App",
+    organization := "com.owlunit",
+    name         := "Test App",
     version      := "0.1.0-SNAPSHOT",
-    scalaVersion := "2.10.2"
+    scalaVersion := "2.10.3"
   )
 
   lazy val project = Project (
     id = "tanaka",
     base = file("."),
     settings = Project.defaultSettings
-      ++ ScalatraPlugin.scalatraWithJRebel
-      ++ scalateSettings
-      ++ scalateLocalSettings
+      ++ Revolver.settings
       ++ buildLocalSettings
       ++ Seq(
 
-      resolvers += Classpaths.typesafeReleases,
+      resolvers ++= customResolvers,
       libraryDependencies ++= Dependencies.all
 
     )
@@ -37,53 +29,40 @@ object TanakaBuild extends Build {
   // Settings
   /////////////////////
 
-  override lazy val settings = super.settings ++ buildSettings ++ compileSettings
+  override lazy val settings = super.settings ++ compileSettings
 
   val compileSettings = Seq (
-    scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked"),
-    javacOptions ++= Seq("-Xlint:unchecked", "-encoding", "UTF-8")
+    scalacOptions ++= Seq("-encoding", "utf8", "-deprecation", "-unchecked"),
+    javacOptions  ++= Seq("-Xlint:unchecked", "-encoding", "UTF-8")
   )
 
-  val scalateLocalSettings = Seq(
-    scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
-      Seq(
-        TemplateConfig(
-          base / "webapp" / "WEB-INF" / "templates",
-          Seq.empty,  /* default imports should be added here */
-          Seq(
-            Binding("context", "_root_.org.scalatra.scalate.ScalatraRenderContext", importMembers = true, isImplicit = true)
-          ),  /* add extra bindings here */
-          Some("templates")
-        )
-      )
-    }
+
+  val customResolvers = Seq(
+    Classpaths.typesafeReleases,
+    "Sonatype Snapshots"    at "http://oss.sonatype.org/content/repositories/snapshots",
+    "Sonatype Releases"     at "http://oss.sonatype.org/content/repositories/releases",
+    "Spray.IO Repo"         at "http://repo.spray.io/"
   )
 
   object Dependencies {
 
     object V {
-      val scalatra = "2.2.1"
+      val akka  = "2.2.3"
+      val spray = "1.2-RC4"
     }
 
-    lazy val all = db ++ scalatra ++ jetty ++ logging
+    lazy val all = Seq(
+      "com.novus"           %% "salat"            % "1.9.4", // exclude("org.scala-lang", "scalap"),
 
-    lazy val db = Seq(
-      "com.novus" %% "salat" % "1.9.4" exclude("org.scala-lang", "scalap")
-    )
+      "io.spray"            %  "spray-can"        % V.spray,
+      "io.spray"            %  "spray-routing"    % V.spray,
+      "io.spray"            %  "spray-testkit"    % V.spray,
 
-    lazy val logging = Seq(
-      "ch.qos.logback" % "logback-classic" % "1.0.6"
-    )
+      "com.typesafe.akka"   %%  "akka-actor"      % V.akka,
+      "com.typesafe.akka"   %%  "akka-testkit"    % V.akka,
 
-    lazy val scalatra = Seq(
-      "org.scalatra" %% "scalatra"         % V.scalatra,
-      "org.scalatra" %% "scalatra-scalate" % V.scalatra,
-      "org.scalatra" %% "scalatra-specs2"  % V.scalatra   % "test"
-    )
-
-    lazy val jetty = Seq(
-      "org.eclipse.jetty"       % "jetty-webapp"  % "8.1.8.v20121106"     % "container",
-      "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "container;provided;test" artifacts Artifact("javax.servlet", "jar", "jar")
+      "ch.qos.logback"      % "logback-classic"   % "1.0.6",
+      "org.specs2"          %%  "specs2"          % "2.2.3" % "test"
     )
 
   }
