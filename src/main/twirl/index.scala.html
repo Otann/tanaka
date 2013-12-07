@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Event source example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="" />
+    <meta name="author" content="Timothy Perrett" />
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" />
+    <style type="text/css">
+        /*<![CDATA[*/
+        .container {
+        margin-top: 40px;
+        text-align: center;
+        }
+        /*]]>*/
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Event stream Example</h1>
+    <p>Use this document as a way to quick start any new project.<br>
+        All you get is this message and a barebones HTML document.</p>
+
+    <div class="span2">&nbsp;</div>
+
+    <div style="margin-bottom: 9px;" class="span8 progress progress-success progress-striped">
+        <div style="width: 0%" class="bar"></div>
+    </div>
+
+</div> <!-- /container -->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript">
+    //<![CDATA[
+    var source = new EventSource("/sse")
+    source.onopen = function(){
+      console.log("opened connection");
+      $('.bar').css('width', '0%');
+    }
+    source.onmessage = function(message){
+      console.log("received message", message);
+      var n = message.data;
+      if(!isNaN(n)){
+        console.log("got new message:", n);
+        $('.bar').css('width', n+'%');
+      } 
+    }
+    //]]>
+    </script>
+</body>
+</html>
