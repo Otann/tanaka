@@ -53,7 +53,7 @@ object TanakaBuild extends Build {
 
     object V {
       val akka  = "2.2.3"
-      val spray = "1.1.0"
+      val spray = "1.2.0"
     }
 
     lazy val all = Seq(

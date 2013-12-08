@@ -1,6 +1,6 @@
 package com.owlunit
 
-import akka.actor.Actor
+import akka.actor.{Props, ActorRef, Actor}
 import akka.event.Logging._
 import spray.routing.directives.LogEntry
 import spray.http._
@@ -10,6 +10,12 @@ import spray.http.CacheDirectives._
 import spray.http.HttpHeaders._
 import spray.httpx.TwirlSupport._
 import html._
+import spray.routing.Directives._
+import spray.http.HttpRequest
+import spray.http.HttpHeaders.RawHeader
+import scala.Some
+import spray.http.HttpResponse
+import scala.concurrent.duration._
 
 class MyServiceActor extends Actor with MyService {
 
@@ -21,35 +27,35 @@ class MyServiceActor extends Actor with MyService {
 
 
 // this trait defines our service behavior independently from the service actor
-trait MyService extends HttpService { // with ServerSideEventsDirectives {
+trait MyService extends HttpService with ServerSideEventsDirectives {
+  import SSEHandler._
 
-//  val sseProcessor = actorRefFactory.actorOf(Props { new Actor {
-//    def receive = {
-//      case (channel: ActorRef, lastEventID: Option[String]) =>
-//        // Print LastEventID if present
-//        lastEventID.foreach(lei => println(s"LastEventID: $lei"))
-//
-//        // Simulate some work
-//        Thread.sleep(3000)
-//
-//        channel ! Message("some\ndata\ntest", Some("customEvent"), Some("someId"))
-//    }
-//  }})
+  val sseProcessor = actorRefFactory.actorOf(Props { new Actor {
+    implicit val ec = akka.dispatch.ExecutionContexts.global()
+    def receive = {
+      case (channel: ActorRef, _) =>
+        // Simulate some work
+        for(msgId <- 1 to 10) {
+          context.system.scheduler.scheduleOnce(msgId.seconds, channel, Message((msgId * 10).toString))
+        }
+
+    }
+  }})
 
   val myRoute =
     host("localhost", "127.0.0.1") {
 
-//      pathPrefix("sse") {
-//        respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*")) {
-//          sse { (channel, lastEventID) =>
-//          // Register a closed event handler
-//            channel ! RegisterClosedHandler( () => println("Connection closed !!!") )
-//
-//            // Use the channel
-//            sseProcessor ! (channel, lastEventID)
-//          }
-//        }
-//      } ~
+      pathPrefix("sse") {
+        respondWithHeader(`Cache-Control`(`no-cache`)) {
+          sse { (channel, lastEventID) =>
+          // Register a closed event handler
+            channel ! RegisterClosedHandler( () => println("Connection closed !!!") )
+
+            // Use the channel
+            sseProcessor ! (channel, lastEventID)
+          }
+        }
+      } ~
       path("favicon.ico") {
         complete(NotFound) // fail early in order to prevent error response logging
       } ~
@@ -64,7 +70,8 @@ trait MyService extends HttpService { // with ServerSideEventsDirectives {
   def respondAsEventStream =
     respondWithHeader(`Cache-Control`(`no-cache`)) &
       respondWithHeader(`Connection`("Keep-Alive")) &
-      respondWithHeader(RawHeader("Content-Type", "text/event-stream"))
+      respondWithHeader(`Content-Type`(`text/event-stream`)) &
+      respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*"))
 
   def showRequest(request: HttpRequest) = LogEntry(request.uri, InfoLevel)
 

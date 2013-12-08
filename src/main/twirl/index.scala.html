@@ -25,9 +25,12 @@
 
     <div class="span2">&nbsp;</div>
 
-    <div style="margin-bottom: 9px;" class="span8 progress progress-success progress-striped">
-        <div style="width: 0%" class="bar"></div>
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
+            <!--<span class="sr-only">60% Complete</span>-->
+        </div>
     </div>
+
 
 </div> <!-- /container -->
 
@@ -36,16 +39,14 @@
     //<![CDATA[
     var source = new EventSource("/sse")
     source.onopen = function(){
-      console.log("opened connection");
-      $('.bar').css('width', '0%');
+      console.log("opened connection 2");
     }
     source.onmessage = function(message){
       console.log("received message", message);
       var n = message.data;
       if(!isNaN(n)){
-        console.log("got new message:", n);
-        $('.bar').css('width', n+'%');
-      } 
+        $('.progress-bar').css('width', n+'%');
+      }
     }
     //]]>
     </script>
