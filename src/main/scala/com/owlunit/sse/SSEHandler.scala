@@ -1,11 +1,11 @@
-package com.owlunit
+package com.owlunit.sse
 
-import akka.actor.{ActorLogging, Props, ReceiveTimeout, Actor}
-import spray.http._
-import spray.http.HttpResponse
-import spray.routing.RequestContext
-import spray.http.ChunkedResponseStart
 import scala.concurrent.duration._
+import akka.actor._
+import spray.http._
+import spray.http.HttpHeaders._
+import spray.http.CacheDirectives.`no-cache`
+import spray.routing.RequestContext
 import java.util.UUID
 import spray.can.Http.ConnectionClosed
 
@@ -17,11 +17,15 @@ class SSEHandler(ctx: RequestContext) extends Actor with ActorLogging {
   import SSEHandler._
 
   val responseStart = {
+    // this is workaround for content-type: text/event-stream
     val mediaType   = MediaType.custom("text/event-stream")
     val contentType = ContentType(mediaType, None)
     val body        = ":" + (" " * 2049) + "\n" // 2k padding for IE using Yaffle
     val entity      = HttpEntity(contentType, body)
-    HttpResponse(StatusCodes.OK, entity)
+    HttpResponse(StatusCodes.OK, entity).withHeaders(
+      `Cache-Control`(`no-cache`),
+      `Connection`("Keep-Alive")
+    )
   }
 
   var closedHandlers: List[() => Unit] = Nil

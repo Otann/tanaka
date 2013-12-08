@@ -1,4 +1,4 @@
-# My Scalatra Web App #
+# My Spray.io Web App #
 
 [![Build Status](https://travis-ci.org/Otann/tanaka.png?branch=master)](https://travis-ci.org/Otann/tanaka)
 [![Coverage Status](https://coveralls.io/repos/Otann/tanaka/badge.png)](https://coveralls.io/r/Otann/tanaka)
@@ -6,10 +6,9 @@
 ## Build & Run ##
 
 ```sh
-$ cd My_Scalatra_Web_App
+$ cd tanaka
 $ ./sbt
-> container:start
-> browse
+> re-start
 ```
 
-If `browse` doesn't launch your browser, manually open [http://localhost:8080/](http://localhost:8080/) in your browser.
+Open [http://localhost:8080/](http://localhost:8080/) in your browser

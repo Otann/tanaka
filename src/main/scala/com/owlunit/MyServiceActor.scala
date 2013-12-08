@@ -16,6 +16,7 @@ import spray.http.HttpHeaders.RawHeader
 import scala.Some
 import spray.http.HttpResponse
 import scala.concurrent.duration._
+import com.owlunit.sse.{SSEHandler, SSEDirectives}
 
 class MyServiceActor extends Actor with MyService {
 
@@ -27,7 +28,7 @@ class MyServiceActor extends Actor with MyService {
 
 
 // this trait defines our service behavior independently from the service actor
-trait MyService extends HttpService with ServerSideEventsDirectives {
+trait MyService extends HttpService with SSEDirectives {
   import SSEHandler._
 
   val sseProcessor = actorRefFactory.actorOf(Props { new Actor {
@@ -67,21 +68,10 @@ trait MyService extends HttpService with ServerSideEventsDirectives {
       }
     }
 
-  def respondAsEventStream =
-    respondWithHeader(`Cache-Control`(`no-cache`)) &
-      respondWithHeader(`Connection`("Keep-Alive")) &
-      respondWithHeader(`Content-Type`(`text/event-stream`)) &
-      respondWithHeader(RawHeader("Access-Control-Allow-Origin", "*"))
-
-  def showRequest(request: HttpRequest) = LogEntry(request.uri, InfoLevel)
-
   def showErrorResponses(request: HttpRequest): Any => Option[LogEntry] = {
     case HttpResponse(OK, _, _, _)       => Some(LogEntry("200: " + request.uri, InfoLevel))
     case HttpResponse(NotFound, _, _, _) => Some(LogEntry("404: " + request.uri, WarningLevel))
-    case r @ HttpResponse(Found | MovedPermanently, _, _, _) =>
-      Some(LogEntry(s"${r.status.intValue}: ${request.uri} -> ${r.header[HttpHeaders.Location].map(_.uri.toString).getOrElse("")}", WarningLevel))
-    case response ⇒ Some(
-      LogEntry("Non-200 response for\n  Request : " + request + "\n  Response: " + response, WarningLevel))
+    case response => Some(LogEntry("Non-200 response for\n  Request : " + request + "\n  Response: " + response, WarningLevel))
   }
 
 }
