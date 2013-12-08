@@ -28,9 +28,8 @@ class SSEHandler(ctx: RequestContext) extends Actor with ActorLogging {
     )
   }
 
-  var closedHandlers: List[() => Unit] = Nil
+  var closeHandlers: List[() => Unit] = Nil
 
-  log.debug(s"SSEHandler sending responseStart: $responseStart")
   ctx.responder ! ChunkedResponseStart(responseStart)
 
   // Ask akka to send ReceiveTimeout for purpose of Keep-Alive
@@ -48,10 +47,10 @@ class SSEHandler(ctx: RequestContext) extends Actor with ActorLogging {
 
     case ReceiveTimeout  => ctx.responder ! MessageChunk(":\n") // Comment to keep connection alive
 
-    case RegisterClosedHandler(handler) => closedHandlers ::= handler
+    case RegisterClosedHandler(handler) => closeHandlers ::= handler
 
     case msg: ConnectionClosed =>
-      closedHandlers.foreach(_())
+      closeHandlers.foreach(_())
       context.stop(self)
 
   }

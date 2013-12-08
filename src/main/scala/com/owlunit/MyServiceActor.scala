@@ -17,6 +17,7 @@ import scala.Some
 import spray.http.HttpResponse
 import scala.concurrent.duration._
 import com.owlunit.sse.{SSEHandler, SSEDirectives}
+import com.owlunit.authentication.UserAuthentication
 
 class MyServiceActor extends Actor with MyService {
 
@@ -28,7 +29,7 @@ class MyServiceActor extends Actor with MyService {
 
 
 // this trait defines our service behavior independently from the service actor
-trait MyService extends HttpService with SSEDirectives {
+trait MyService extends HttpService with SSEDirectives with UserAuthentication {
   import SSEHandler._
 
   val sseProcessor = actorRefFactory.actorOf(Props { new Actor {
@@ -44,7 +45,7 @@ trait MyService extends HttpService with SSEDirectives {
   }})
 
   val myRoute =
-    host("localhost", "127.0.0.1") {
+    host("localhost", "127.0.0.1", "local.owlunit.com") {
 
       pathPrefix("sse") {
         respondWithHeader(`Cache-Control`(`no-cache`)) {
@@ -59,6 +60,15 @@ trait MyService extends HttpService with SSEDirectives {
       } ~
       path("favicon.ico") {
         complete(NotFound) // fail early in order to prevent error response logging
+      } ~
+      path("api") {
+        path("auth") {
+
+          authenticate(authenticateUser) { user =>
+            complete("/")
+          }
+
+        }
       } ~
       logRequestResponse(showErrorResponses _) {
         getFromResourceDirectory("static/") ~
