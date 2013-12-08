@@ -1,6 +1,9 @@
 import sbt._
 import Keys._
+import sbtassembly.Plugin._
+import sbtassembly.Plugin.AssemblyKeys._
 import spray.revolver.RevolverPlugin._
+import twirl.sbt.TwirlPlugin._
 
 object TanakaBuild extends Build {
 
@@ -16,6 +19,8 @@ object TanakaBuild extends Build {
     base = file("."),
     settings = Project.defaultSettings
       ++ Revolver.settings
+      ++ Twirl.settings
+      ++ assemblySettings
       ++ buildLocalSettings
       ++ Seq(
 
@@ -48,7 +53,7 @@ object TanakaBuild extends Build {
 
     object V {
       val akka  = "2.2.3"
-      val spray = "1.2-RC4"
+      val spray = "1.2.0"
     }
 
     lazy val all = Seq(
@@ -60,8 +65,9 @@ object TanakaBuild extends Build {
 
       "com.typesafe.akka"   %%  "akka-actor"      % V.akka,
       "com.typesafe.akka"   %%  "akka-testkit"    % V.akka,
+      "com.typesafe.akka"   %%  "akka-slf4j"      % V.akka,
 
-      "ch.qos.logback"      % "logback-classic"   % "1.0.6",
+      "ch.qos.logback"      %   "logback-classic" % "1.0.6",
       "org.specs2"          %%  "specs2"          % "2.2.3" % "test"
     )
 
