@@ -5,7 +5,6 @@ import akka.event.Logging._
 import spray.routing.directives.LogEntry
 import spray.http._
 import spray.routing._
-import StatusCodes._
 import spray.http.CacheDirectives._
 import spray.http.HttpHeaders._
 import spray.httpx.TwirlSupport._
@@ -17,7 +16,10 @@ import scala.Some
 import spray.http.HttpResponse
 import scala.concurrent.duration._
 import com.owlunit.sse.{SSEHandler, SSEDirectives}
-import com.owlunit.authentication.UserAuthentication
+import com.owlunit.authentication.{NoUserLoggedInRejection, UserAuthentication}
+import scala.concurrent.ExecutionContext
+import scala.util.{Success, Failure}
+import com.owlunit.lib.FacebookGraph
 
 class MyServiceActor extends Actor with MyService {
 
@@ -31,6 +33,7 @@ class MyServiceActor extends Actor with MyService {
 // this trait defines our service behavior independently from the service actor
 trait MyService extends HttpService with SSEDirectives with UserAuthentication {
   import SSEHandler._
+  import ExecutionContext.Implicits.global
 
   val sseProcessor = actorRefFactory.actorOf(Props { new Actor {
     implicit val ec = akka.dispatch.ExecutionContexts.global()
@@ -59,7 +62,7 @@ trait MyService extends HttpService with SSEDirectives with UserAuthentication {
         }
       } ~
       path("favicon.ico") {
-        complete(NotFound) // fail early in order to prevent error response logging
+        complete(StatusCodes.NotFound) // fail early in order to prevent error response logging
       } ~
       path("api") {
         path("auth") {
@@ -68,6 +71,15 @@ trait MyService extends HttpService with SSEDirectives with UserAuthentication {
             complete("/")
           }
 
+        } ~
+        path("doauth") {
+          signUserIn
+//          parameters('token, 'id) { (token, id) =>
+//            FacebookGraph.basicUserInfo(token, "") onComplete {
+//              case Success(jvalue) => complete("The user was logged in")
+//              case Failure(reason) => reject(NoUserLoggedInRejection)
+//            }
+//          }
         }
       } ~
       logRequestResponse(showErrorResponses _) {
@@ -78,9 +90,13 @@ trait MyService extends HttpService with SSEDirectives with UserAuthentication {
       }
     }
 
+  implicit val customRejectionHandlers = RejectionHandler {
+    case NoUserLoggedInRejection :: _ => ctx => ctx.redirect("/auth", StatusCodes.SeeOther)
+  }
+
   def showErrorResponses(request: HttpRequest): Any => Option[LogEntry] = {
-    case HttpResponse(OK, _, _, _)       => Some(LogEntry("200: " + request.uri, InfoLevel))
-    case HttpResponse(NotFound, _, _, _) => Some(LogEntry("404: " + request.uri, WarningLevel))
+    case HttpResponse(StatusCodes.OK, _, _, _)       => Some(LogEntry("200: " + request.uri, InfoLevel))
+    case HttpResponse(StatusCodes.NotFound, _, _, _) => Some(LogEntry("404: " + request.uri, WarningLevel))
     case response => Some(LogEntry("Non-200 response for\n  Request : " + request + "\n  Response: " + response, WarningLevel))
   }
 

@@ -1,28 +1,30 @@
 package com.owlunit.models
 
 import com.novus.salat.global._
-import com.novus.salat.annotations.raw.Persist
+import com.novus.salat.annotations.raw.{Key, Persist}
 import com.mongodb.casbah.commons.MongoDBObject
-import com.mongodb.casbah.WriteConcern
 import com.novus.salat.dao.SalatDAO
-import org.bson.types.ObjectId
 import com.owlunit.lib.md5
+import com.mongodb.casbah.Imports._
 
 /**
  * Fresh start for user model
  */
-case class User(fullName      : String = "",
-                firstName     : String = "",
-                lastName      : String = "",
-                photos        : UserPhotoUrls = UserPhotoUrls(),
-                facebook      : FacebookAuthInfo)
+case class User(firstName : String,
+                lastName  : String,
+                session   : FacebookSession,
+                @Key("_id") id: ObjectId = new ObjectId())
 
 
-case class UserPhotoUrls(main: String = "http://placehold.it/150x150",
-                         backdrop: String = "http://placehold.it/150x150")
+abstract class UserDAOAbstract(collection: MongoCollection) extends SalatDAO[User, ObjectId](collection) {
 
-case class FacebookAuthInfo(id: String, token: String) {
-  // Save secret hash to DB
+  def findByFacebook(facebookId: String) = this.findOne(MongoDBObject("facebook.id" -> facebookId))
+  
+}
+
+object UserDAO extends UserDAOAbstract(db("user"))
+
+case class FacebookSession(id: String, token: String) {
   @Persist val hash = calculate(id, token)
 
   // Add salt to hide plain md5
@@ -33,21 +35,6 @@ case class FacebookAuthInfo(id: String, token: String) {
 
   // allow to check any other id and token
   def check(facebookId: String, facebookToken: String) = hash == calculate(facebookId, facebookToken)
-}
-
-object UserDAO extends SalatDAO[User, ObjectId](db("user.users")) {
-
-  def findOrCreate(facebookId: String, token: String) = this.findByFacebook(facebookId) match {
-    case Some(user) =>
-      user
-    case None =>
-      val user = User(facebook = FacebookAuthInfo(facebookId, token))
-      this.save(user, WriteConcern.Majority)
-      user
-  }
-
-  def findByFacebook(facebookId: String) = this.findOne(MongoDBObject("facebook.id" -> facebookId))
-
 }
 
 

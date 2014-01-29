@@ -57,18 +57,21 @@ object TanakaBuild extends Build {
     }
 
     lazy val all = Seq(
-      "com.novus"           %% "salat"            % "1.9.4", // exclude("org.scala-lang", "scalap"),
+      "com.novus"               %% "salat"            % "1.9.4", // exclude("org.scala-lang", "scalap"),
 
-      "io.spray"            %  "spray-can"        % V.spray,
-      "io.spray"            %  "spray-routing"    % V.spray,
-      "io.spray"            %  "spray-testkit"    % V.spray,
+      "io.spray"                %  "spray-can"        % V.spray,
+      "io.spray"                %  "spray-routing"    % V.spray,
+      "io.spray"                %  "spray-testkit"    % V.spray,
 
-      "com.typesafe.akka"   %%  "akka-actor"      % V.akka,
-      "com.typesafe.akka"   %%  "akka-testkit"    % V.akka,
-      "com.typesafe.akka"   %%  "akka-slf4j"      % V.akka,
+      "com.typesafe.akka"       %%  "akka-actor"      % V.akka,
+      "com.typesafe.akka"       %%  "akka-testkit"    % V.akka,
+      "com.typesafe.akka"       %%  "akka-slf4j"      % V.akka,
 
-      "ch.qos.logback"      %   "logback-classic" % "1.0.6",
-      "org.specs2"          %%  "specs2"          % "2.2.3" % "test"
+      // For comunicationg with exterlal REST APIs
+      "net.databinder.dispatch" %% "dispatch-core"    % "0.11.0",
+
+      "ch.qos.logback"          %   "logback-classic" % "1.0.6",
+      "org.specs2"              %%  "specs2"          % "2.2.3" % "test"
     )
 
   }

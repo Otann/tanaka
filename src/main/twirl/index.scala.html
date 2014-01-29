@@ -36,17 +36,17 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript">
     //<![CDATA[
-    var source = new EventSource("/sse")
+    var source = new EventSource("/sse");
     source.onopen = function(){
       console.log("opened connection 2");
-    }
+    };
     source.onmessage = function(message){
       console.log("received message", message);
       var n = message.data;
       if(!isNaN(n)){
         $('.progress-bar').css('width', n+'%');
       }
-    }
+    };
     //]]>
 </script>
 <script>
@@ -63,6 +63,8 @@
   // whenever someone who was previously logged out tries to log in again, the correct case below
   // will be handled.
   FB.Event.subscribe('auth.authResponseChange', function(response) {
+      console.log("got responce: ", response);
+
     // Here we specify what we do with the response anytime this event occurs.
     if (response.status === 'connected') {
       // The response object is returned with a status field that lets the app know the current
