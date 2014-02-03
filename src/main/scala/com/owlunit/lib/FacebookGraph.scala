@@ -1,10 +1,10 @@
 package com.owlunit.lib
 
+import dispatch._
 import org.joda.time.DateTime
 import com.typesafe.config.ConfigFactory
-import dispatch._
-import scala.util.{Success, Try, Failure}
 import org.json4s.JValue
+import scala.concurrent.ExecutionContext
 
 /**
  * Accessor to Facebook Graph API
@@ -31,7 +31,7 @@ object FacebookGraph extends DispatchHelper {
    * @param code from facebook
    * @return AccessToken
    */
-  def accessToken(csrf: String, code: String): Future[Try[AccessToken]] = {
+  def accessToken(csrf: String, code: String)(implicit executor: ExecutionContext): Future[AccessToken] = {
 
     val req = baseHost / "oauth" / "access_token" <<? Map(
       "client_id"     -> key,
@@ -53,10 +53,10 @@ object FacebookGraph extends DispatchHelper {
       (tokenParams.get("access_token"), tokenParams.get("expires")) match {
 
         case (Some(token), Some(exp)) =>
-          Try(AccessToken(token, code, (new DateTime).plusSeconds(exp.toInt)))
+          AccessToken(token, code, (new DateTime).plusSeconds(exp.toInt))
 
         case _ =>
-          Failure(new IllegalArgumentException("Can't receive access_token or expiration time"))
+          throw new IllegalArgumentException("Can't receive access_token or expiration time")
       }
     }
   }
@@ -68,7 +68,7 @@ object FacebookGraph extends DispatchHelper {
    * @param token token
    * @return JValue
    */
-  private def completeOauthReq(req: Req, token: String): Future[Try[JValue]] =
+  private def completeOauthReq(req: Req, token: String)(implicit executor: ExecutionContext): Future[JValue] =
     completeJsonRequest(req <<? Map("access_token" -> token))
 
 
@@ -77,7 +77,7 @@ object FacebookGraph extends DispatchHelper {
    * @param id facebookId
    * @return json with values
    */
-  def publicUserInfo(id: String, fields: String): Future[Try[JValue]] =
+  def publicUserInfo(id: String, fields: String)(implicit executor: ExecutionContext): Future[JValue] =
     completeJsonRequest(baseHost / id <<? Map("fields" -> fields))
 
   /**
@@ -87,7 +87,7 @@ object FacebookGraph extends DispatchHelper {
    * @param fields requested fields
    * @return info about user in json
    */
-  def basicUserInfo(token: String, fields: String): Future[Try[JValue]] =
+  def basicUserInfo(token: String, fields: String)(implicit executor: ExecutionContext): Future[JValue] =
     completeOauthReq(baseHost / "me" <<? Map("fields" -> fields), token)
 
 

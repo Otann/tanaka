@@ -2,8 +2,9 @@ package com.owlunit.authentication
 
 import spray.routing.Rejection
 
-//TODO: add description
 /**
- * Created by otann on 29/01/14.
+ * All possible authentication rejections
  */
-object NoUserLoggedInRejection extends Rejection
+trait LoginRejection extends Rejection
+object FacebookTokenMismatch extends LoginRejection
+object FacebookFail extends LoginRejection

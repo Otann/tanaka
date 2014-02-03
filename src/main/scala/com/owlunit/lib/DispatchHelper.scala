@@ -2,7 +2,7 @@ package com.owlunit.lib
 
 import dispatch._
 import scala.util.Try
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 import org.json4s._
 import org.json4s.native.JsonMethods._
@@ -20,7 +20,8 @@ trait DispatchHelper {
    * @tparam T return type of func
    * @return result of the func applied to result
    */
-  def doRequest[T](request: Req)(func: String => Try[T]): Future[Try[T]] = Http(request OK as.String).map(func)
+  def doRequest[T](request: Req)(func: String => T)(implicit executor: ExecutionContext): Future[T] =
+    Http(request OK as.String).map(func)
 
   
   /**
@@ -29,6 +30,7 @@ trait DispatchHelper {
    * @param request built request i.e. host("example.com").secure / "sample" / "path"
    * @return json value
    */
-  def completeJsonRequest(request: Req): Future[Try[JValue]] = doRequest(request)( out => Try { parse(out) } )
+  def completeJsonRequest(request: Req)(implicit executor: ExecutionContext): Future[JValue] =
+    doRequest(request)( out => parse(out) )
 
 }
