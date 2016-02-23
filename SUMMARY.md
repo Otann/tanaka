@@ -1,6 +1,6 @@
 # Summary
 
 * Bolg
-* Chapter
+* [Chapter](chapter.md)
    * theme 1
 
